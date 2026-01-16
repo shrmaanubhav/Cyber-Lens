@@ -3,7 +3,7 @@ import { historyController } from "../controllers/historyController";
 
 const router = Router();
 
-router.get("/history", historyController);
+router.get("/", historyController);
 
 export default router;
 

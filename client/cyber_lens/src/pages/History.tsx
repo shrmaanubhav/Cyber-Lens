@@ -1,31 +1,52 @@
+import { useEffect, useState } from "react";
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
+
 type Row = {
   ioc: string;
   verdict: "Malicious" | "Clean" | "Suspicious" | "";
   timestamp: string;
-  note: string;
+  score: number;
 };
 
 export default function History() {
-  const dummyData: Row[] = [
-    {
-      ioc: "8.8.8.8",
-      verdict: "Malicious",
-      timestamp: "2025-01-12 14:32",
-      note: "Known public DNS abuse",
-    },
-    {
-      ioc: "example.com",
-      verdict: "Clean",
-      timestamp: "2025-01-11 10:05",
-      note: "No recent issues",
-    },
-    {
-      ioc: "http://suspicious.example",
-      verdict: "Suspicious",
-      timestamp: "2025-01-10 08:14",
-      note: "Low-confidence detection",
-    },
-  ];
+  const [rows, setRows] = useState<Row[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadHistory() {
+      try {
+        const res = await fetch(`${API_BASE}/history`, {
+          credentials: "include", // safe even if unused
+          headers: {
+            "X-Client-ID": "26121325-8615-4c56-a122-5bb85a91c648"
+          }
+        });
+  
+        if (!res.ok) {
+          throw new Error("Failed to fetch history");
+        }
+  
+        const data = await res.json();
+  
+        const mapped: Row[] = data.map((r: any) => ({
+          ioc: r.ioc_value,
+          verdict: r.verdict ?? "",
+          timestamp: new Date(r.created_at).toLocaleString(),
+          score: r.score ?? 0,
+        }));
+  
+        setRows(mapped);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+  
+    loadHistory();
+  }, []);
+
 
   const badgeClass = (v: string) =>
     v === "Malicious"
@@ -35,6 +56,22 @@ export default function History() {
       : v === "Suspicious"
       ? "bg-amber-500/10 text-amber-400 ring-amber-500/30"
       : "bg-neutral-600/10 text-neutral-400 ring-neutral-600/30";
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-neutral-950 text-neutral-400 flex items-center justify-center">
+        Loading history...
+      </div>
+    );
+  }
+
+  if (rows.length === 0) {
+    return (
+      <div className="min-h-screen bg-neutral-950 text-neutral-400 flex items-center justify-center">
+        No scan history yet.
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 px-4 py-12">
@@ -66,7 +103,7 @@ export default function History() {
 
         {/* Mobile cards */}
         <div className="space-y-4 md:hidden">
-          {dummyData.map((row, idx) => (
+          {rows.map((row, idx) => (
             <div
               key={idx}
               className="border border-neutral-800 bg-neutral-900 p-4"
@@ -84,7 +121,7 @@ export default function History() {
                 </span>
               </div>
 
-              <div className="mt-2 text-sm text-neutral-300">{row.note}</div>
+              <div className="mt-2 text-sm text-neutral-300">{row.score}</div>
 
               <div className="mt-3 text-xs text-neutral-400">
                 {row.timestamp}
@@ -109,13 +146,13 @@ export default function History() {
                     Timestamp
                   </th>
                   <th className="border border-neutral-700 px-4 py-3 text-left font-medium">
-                    Note
+                    Score
                   </th>
                 </tr>
               </thead>
 
               <tbody>
-                {dummyData.map((row, idx) => (
+              {rows.map((row, idx) => (
                   <tr
                     key={idx}
                     className="hover:bg-neutral-900 transition-colors"
@@ -150,7 +187,7 @@ export default function History() {
                     </td>
 
                     <td className="border border-neutral-800 px-4 py-3 text-neutral-300 truncate max-w-xs">
-                      {row.note || "—"}
+                      {row.score || "—"}
                     </td>
                   </tr>
                 ))}
@@ -159,7 +196,7 @@ export default function History() {
           </div>
 
           <div className="mt-3 text-xs text-neutral-500">
-            Showing {dummyData.length} recent scans — optimized for analyst
+            Showing {rows.length} recent scans — optimized for analyst
             review.
           </div>
         </div>

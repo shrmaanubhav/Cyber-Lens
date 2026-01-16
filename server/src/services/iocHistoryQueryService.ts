@@ -16,12 +16,10 @@ export async function queryHistory({
   const { rows } = await pool.query(
     `
     SELECT
-      id,
-      owner_type,
-      owner_id,
-      ioc_type,
       ioc_value,
-      created_at
+      verdict,
+      created_at as timestamp,
+      score
     FROM ioc_history
     WHERE owner_type = $1
       AND owner_id = $2
