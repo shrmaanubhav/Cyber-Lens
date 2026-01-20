@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import resolveOwner from "./utils/resolveOwner";
+import newsRouter from "./routes/news";
 import lookupRouter from "./routes/lookup";
 import historyRouter from "./routes/history";
 import router from "./routes";
@@ -24,6 +25,7 @@ app.use(
   })
 );
 
+app.use("/news", newsRouter);
 app.use(resolveOwner);
 
 app.get("/", (_req, res) => {
