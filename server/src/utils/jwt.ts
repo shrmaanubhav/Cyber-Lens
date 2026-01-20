@@ -1,7 +1,7 @@
 import jwt, { type JwtPayload } from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const ACCESS_TOKEN_EXPIRES_IN = "60s";
+const ACCESS_TOKEN_EXPIRES_IN = "30m";
 const JWT_ALGORITHM = "HS256";
 
 interface AccessTokenPayload {
