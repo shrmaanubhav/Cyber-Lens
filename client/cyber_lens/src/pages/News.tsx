@@ -1,47 +1,60 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { httpJson } from "../utils/httpClient";
 
 type NewsItem = {
   title: string;
   summary: string;
-  category?: "Threat" | "Vulnerability" | "Advisory";
+  source: string;
+  published_at: string;
+};
+
+type PaginatedResponse<T> = {
+  items: T[];
+  total: number;
 };
 
 export default function News() {
+  const ITEMS_PER_PAGE = 9;
+
+  const [currentPage, setCurrentPage] = useState(1);
   const [query, setQuery] = useState("");
+  const [_, setLoading] = useState(false);
 
-  const newsItems: NewsItem[] = [
-    {
-      title: "New Ransomware Campaign Targets Indian Enterprises",
-      summary:
-        "Security researchers report a surge in ransomware operations targeting mid-size Indian enterprises through phishing and exposed services.",
-      category: "Threat",
-    },
-    {
-      title: "Zero-Day Vulnerability Found in Popular Web Framework",
-      summary:
-        "A critical zero-day vulnerability allows remote code execution. Active exploitation has been observed in the wild.",
-      category: "Vulnerability",
-    },
-    {
-      title: "Threat Actors Exploit Misconfigured Cloud Buckets",
-      summary:
-        "Public cloud storage misconfigurations continue to leak sensitive data at scale across industries.",
-      category: "Advisory",
-    },
-  ];
+  const [rows, setRows] = useState<NewsItem[]>([]);
 
-  const categoryStyle = (cat?: string) =>
-    cat === "Threat"
-      ? "bg-red-600/10 text-red-400 ring-red-600/30"
-      : cat === "Vulnerability"
-      ? "bg-amber-500/10 text-amber-400 ring-amber-500/30"
-      : "bg-cyan-500/10 text-cyan-400 ring-cyan-500/30";
+  useEffect(() => {
+    async function fetchNews() {
+      try {
+        const { items } = await httpJson<PaginatedResponse<NewsItem>>("/news");
 
-  const filteredNews = newsItems.filter(
-    (item) =>
-      item.title.toLowerCase().includes(query.toLowerCase()) ||
-      item.summary.toLowerCase().includes(query.toLowerCase())
-  );
+        console.log("data", items);
+
+        const mapped: NewsItem[] = items.map((item) => ({
+          ...item,
+          published_at: item.published_at.split("T")[0],
+        }));
+
+        setRows(mapped);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchNews();
+  }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query]);
+
+  const filteredNews = useMemo(() => {
+    return rows.filter(
+      (item) =>
+        item.title.toLowerCase().includes(query.toLowerCase()) ||
+        item.summary.toLowerCase().includes(query.toLowerCase()),
+    );
+  }, [rows, query]);
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 px-4 py-12">
@@ -83,30 +96,17 @@ export default function News() {
               key={idx}
               className="relative flex flex-col border border-neutral-800 bg-neutral-900 hover:bg-neutral-800/70 transition-colors"
             >
-              {/* Severity bar */}
-              <div className="h-1 w-full bg-neutral-800">
-                <div
-                  className={`h-full ${
-                    item.category === "Threat"
-                      ? "bg-red-500"
-                      : item.category === "Vulnerability"
-                      ? "bg-amber-500"
-                      : "bg-cyan-500"
-                  }`}
-                />
-              </div>
-
               <div className="flex flex-col flex-1 p-4">
                 {/* Meta */}
                 <div className="mb-3 flex items-center justify-between">
                   <span
-                    className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium ring-1 ${categoryStyle(
-                      item.category
-                    )}`}
+                    className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium ring-1`}
                   >
-                    {item.category}
+                    {item.source}
                   </span>
-                  <span className="text-xs text-neutral-500">Intelligence</span>
+                  <span className="text-xs text-neutral-500">
+                    {item.published_at}
+                  </span>
                 </div>
 
                 {/* Title */}
