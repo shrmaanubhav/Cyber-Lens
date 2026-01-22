@@ -12,6 +12,13 @@ type NewsDetail = {
   iocs: { type: string; value: string }[];
 };
 
+function toExternalUrl(value: string): string {
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    return value;
+  }
+  return `https://${value}`;
+}
+
 export default function NewsDetail() {
   const { id } = useParams<{ id: string }>();
   const [article, setArticle] = useState<NewsDetail | null>(null);
@@ -25,8 +32,10 @@ export default function NewsDetail() {
         setLoading(true);
         const data = await httpJson<NewsDetail>(`/news/${id}`);
         setArticle({
-            ...data,
-            published_at: data.published_at ? data.published_at.split("T")[0] : null
+          ...data,
+          published_at: data.published_at
+            ? data.published_at.split("T")[0]
+            : null,
         });
       } catch (err) {
         console.error(err);
@@ -50,7 +59,10 @@ export default function NewsDetail() {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100 px-4 py-12">
         <div className="max-w-4xl mx-auto">
-          <Link to="/news" className="text-cyan-400 hover:text-cyan-300 mb-6 inline-block">
+          <Link
+            to="/news"
+            className="text-cyan-400 hover:text-cyan-300 mb-6 inline-block"
+          >
             ← Back to News
           </Link>
           <div className="p-4 border border-red-900/50 bg-red-900/10 rounded text-red-200">
@@ -64,67 +76,87 @@ export default function NewsDetail() {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 px-4 py-12">
       <div className="max-w-4xl mx-auto">
-        <Link to="/news" className="text-cyan-400 hover:text-cyan-300 mb-6 inline-block text-sm font-medium transition-colors">
-            ← Back to News
+        <Link
+          to="/news"
+          className="text-cyan-400 hover:text-cyan-300 mb-6 inline-block text-sm font-medium transition-colors"
+        >
+          ← Back to News
         </Link>
-        
-        <article className="bg-neutral-900 border border-neutral-800 rounded-lg p-6 sm:p-10 shadow-xl">
-            {/* Header */}
-            <header className="mb-8 border-b border-neutral-800 pb-6">
-                <div className="flex flex-wrap items-center gap-3 mb-4 text-sm text-neutral-400">
-                    <span className="px-2 py-1 bg-neutral-800 rounded text-neutral-300 font-medium">
-                        {article.source}
-                    </span>
-                    {article.published_at && (
-                        <>
-                            <span>•</span>
-                            <span>{article.published_at}</span>
-                        </>
-                    )}
-                </div>
-                <h1 className="text-2xl sm:text-4xl font-bold leading-tight text-white mb-6">
-                    {article.title}
-                </h1>
-                {article.url && (
-                    <a 
-                        href={article.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
-                    >
-                        Read original source 
-                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                    </a>
-                )}
-            </header>
 
-            {/* Content */}
-            <div className="prose prose-invert max-w-none mb-10 text-neutral-300 leading-relaxed whitespace-pre-wrap">
-                {article.summary || "No summary available."}
+        <article className="bg-neutral-900 border border-neutral-800 rounded-lg p-6 sm:p-10 shadow-xl">
+          {/* Header */}
+          <header className="mb-8 border-b border-neutral-800 pb-6">
+            <div className="flex flex-wrap items-center gap-3 mb-4 text-sm text-neutral-400">
+              <span className="px-2 py-1 bg-neutral-800 rounded text-neutral-300 font-medium">
+                {article.source}
+              </span>
+              {article.published_at && (
+                <>
+                  <span>•</span>
+                  <span>{article.published_at}</span>
+                </>
+              )}
             </div>
 
-            {/* IOCs Section */}
-            {article.iocs && article.iocs.length > 0 && (
-                <section className="bg-neutral-950/50 rounded-md border border-neutral-800 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-neutral-800 bg-neutral-800/20">
-                        <h2 className="text-lg font-semibold text-white">Indicators of Compromise (IOCs)</h2>
-                    </div>
-                    <div className="divide-y divide-neutral-800">
-                        {article.iocs.map((ioc, idx) => (
-                            <div key={idx} className="flex flex-col sm:flex-row sm:items-center px-4 py-3 gap-2">
-                                <span className="text-xs font-mono uppercase text-neutral-500 w-24 shrink-0">
-                                    {ioc.type}
-                                </span>
-                                <code className="text-sm font-mono text-cyan-300 break-all select-all">
-                                    {ioc.value}
-                                </code>
-                            </div>
-                        ))}
-                    </div>
-                </section>
+            <h1 className="text-2xl sm:text-4xl font-bold leading-tight text-white mb-6">
+              {article.title}
+            </h1>
+
+            {article.url && (
+              <a
+                href={article.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+              >
+                Read original source
+              </a>
             )}
+          </header>
+
+          {/* Content */}
+          <div className="prose prose-invert max-w-none mb-10 text-neutral-300 leading-relaxed whitespace-pre-wrap">
+            {article.summary || "No summary available."}
+          </div>
+
+          {/* IOCs Section */}
+          {article.iocs.length > 0 && (
+            <section className="bg-neutral-950/50 rounded-md border border-neutral-800 overflow-hidden">
+              <div className="px-4 py-3 border-b border-neutral-800 bg-neutral-800/20">
+                <h2 className="text-lg font-semibold text-white">
+                  Indicators of Compromise (IOCs)
+                </h2>
+              </div>
+
+              <div className="divide-y divide-neutral-800">
+                {article.iocs.map((ioc, idx) => (
+                  <div
+                    key={idx}
+                    className="flex flex-col sm:flex-row sm:items-center px-4 py-3 gap-2"
+                  >
+                    <span className="text-xs font-mono uppercase text-neutral-500 w-24 shrink-0">
+                      {ioc.type}
+                    </span>
+
+                    {ioc.type === "url" ? (
+                      <a
+                        href={toExternalUrl(ioc.value)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-mono text-cyan-400 hover:text-cyan-300 break-all"
+                      >
+                        {ioc.value}
+                      </a>
+                    ) : (
+                      <code className="text-sm font-mono text-cyan-300 break-all select-all">
+                        {ioc.value}
+                      </code>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </article>
       </div>
     </div>
