@@ -6,6 +6,7 @@ import resolveRuntimeOwner from "./middleware/resolveRuntimeOwner";
 import newsRouter from "./routes/news";
 import lookupRouter from "./routes/lookup";
 import historyRouter from "./routes/history";
+import analyticsRouter from "./routes/analytics";
 import router from "./routes";
 import { runNewsScraper } from "./services/newsScraper";
 
@@ -54,6 +55,8 @@ app.get("/", (_req, res) => {
 app.use("/", router);
 app.use("/lookup", lookupRouter);
 app.use("/history", historyRouter);
+app.use("/analytics", analyticsRouter);
+app.use("/", router);
 app.use("/news", newsRouter);
 
 export default app;
