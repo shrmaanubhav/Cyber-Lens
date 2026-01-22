@@ -16,18 +16,25 @@ export async function queryHistory({
   search,
 }: HistoryQueryParams) {
   const params: Array<string | number> = [ownerType, ownerId];
-  const searchClause = search
-    ? "AND (ioc_value ILIKE $3 OR ioc_type ILIKE $3 OR verdict ILIKE $3 OR to_char(created_at, 'DD/MM/YYYY HH24:MI') ILIKE $3)"
-    : "";
+  let searchClause = "";
 
   if (search) {
     params.push(`%${search}%`);
+    const searchIndex = params.length;
+    searchClause =
+      "AND (ioc_value ILIKE $" +
+      searchIndex +
+      " OR ioc_type ILIKE $" +
+      searchIndex +
+      " OR verdict ILIKE $" +
+      searchIndex +
+      ")";
   }
 
   params.push(limit, offset);
 
-  const limitIndex = search ? 4 : 3;
-  const offsetIndex = search ? 5 : 4;
+  const limitIndex = search ? params.length - 1 : 3;
+  const offsetIndex = search ? params.length : 4;
 
   const { rows } = await pool.query(
     `

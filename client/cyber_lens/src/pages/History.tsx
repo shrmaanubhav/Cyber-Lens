@@ -118,7 +118,7 @@ export default function History() {
                   setAppliedSearch(search);
                 }
               }}
-              placeholder="Search IOC, type, verdict, date…"
+              placeholder="Search IOC, type, verdict…"
               className="w-full sm:w-64 px-3 py-2 text-sm bg-neutral-900 border border-neutral-800 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
             />
             <button
