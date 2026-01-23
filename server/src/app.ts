@@ -1,7 +1,10 @@
 import express from "express";
 import cors from "cors";
 import resolveOwner from "./utils/resolveOwner";
-import { authenticateUserOptional } from "./middleware/authenticateUser";
+import {
+  authenticateUser,
+  authenticateUserOptional,
+} from "./middleware/authenticateUser";
 import resolveRuntimeOwner from "./middleware/resolveRuntimeOwner";
 import newsRouter from "./routes/news";
 import lookupRouter from "./routes/lookup";
@@ -55,7 +58,8 @@ app.get("/", (_req, res) => {
 app.use("/", router);
 app.use("/lookup", lookupRouter);
 app.use("/history", historyRouter);
-app.use("/analytics", analyticsRouter);
+// Protected routes: require a valid JWT
+app.use("/analytics", authenticateUser, analyticsRouter);
 app.use("/", router);
 app.use("/news", newsRouter);
 
