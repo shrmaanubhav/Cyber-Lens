@@ -46,6 +46,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/analytics" element={<Analytics />} />
         </Route>
 
         {/*
