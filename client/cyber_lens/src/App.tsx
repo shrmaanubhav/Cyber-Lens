@@ -9,6 +9,10 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import History from "./pages/History";
 import News from "./pages/News";
+import Login from "../../../contributors/MK-codes365/pages/Login";
+import Signup from "../../../contributors/MK-codes365/pages/Signup";
+import VerifyEmail from "../../../contributors/MK-codes365/pages/VerifyEmail";
+import Analytics from "./pages/Analytics";
 
 const Layout = () => {
   return (
@@ -30,6 +34,10 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/history" element={<History />} />
           <Route path="/news" element={<News />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/analytics" element={<Analytics />} />
         </Route>
       </Routes>
     </Router>

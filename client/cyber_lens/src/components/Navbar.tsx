@@ -36,6 +36,9 @@ const Navbar = () => {
             <NavLink to="/news" className={linkClass}>
               News
             </NavLink>
+            <NavLink to="/analytics" className={linkClass}>
+              Analytics
+            </NavLink>
           </div>
 
           {/* Mobile Menu Button */}
@@ -73,6 +76,13 @@ const Navbar = () => {
               className={linkClass}
             >
               News
+            </NavLink>
+            <NavLink
+              to="/analytics"
+              onClick={() => setOpen(false)}
+              className={linkClass}
+            >
+              Analytics
             </NavLink>
           </div>
         )}
