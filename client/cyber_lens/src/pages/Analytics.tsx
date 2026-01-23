@@ -1,18 +1,53 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+type AnalyticsResponse = {
+  total_lookups: number;
+  unique_iocs: number;
+  ioc_type_breakdown: {
+    ip: number;
+    domain: number;
+    url: number;
+    hash: number;
+  };
+  recent_lookups: {
+    ioc_value: string;
+    ioc_type: string;
+    timestamp: string;
+  }[];
+};
+
 const Analytics: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<AnalyticsResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Check auth state from local storage.
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("token");
-      setIsLoggedIn(!!token);
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setIsLoggedIn(false);
       setLoading(false);
-    };
-    checkAuth();
+      return;
+    }
+
+    setIsLoggedIn(true);
+
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/analytics/summary`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "X-Client-ID": "cyberlens-web",
+      },
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error("API Error");
+        return res.json();
+      })
+      .then(setData)
+      .catch(() => setError("Failed to load analytics"))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -46,6 +81,22 @@ const Analytics: React.FC = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-neutral-950 text-red-400 flex items-center justify-center">
+        {error}
+      </div>
+    );
+  }
+
+  if (!data || data.total_lookups === 0) {
+    return (
+      <div className="min-h-screen bg-neutral-950 text-neutral-400 flex items-center justify-center">
+        No analytics data available yet.
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
       <div className="max-w-6xl mx-auto px-4 py-12">
@@ -58,84 +109,81 @@ const Analytics: React.FC = () => {
           </p>
         </div>
 
-        {/* Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Analytics Overview Placeholder */}
+          {/* Overview */}
           <div className="col-span-1 lg:col-span-3 border border-neutral-800 bg-neutral-900 p-6 rounded-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-cyan-400">Overview</h3>
-              <span className="text-xs text-neutral-500 uppercase tracking-wider">
-                Last 30 Days
-              </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <StatCard title="Total Lookups" value={data.total_lookups} />
+              <StatCard title="Unique IOCs Queried" value={data.unique_iocs} />
             </div>
-            <div className="h-48 flex items-center justify-center border border-dashed border-neutral-800 bg-neutral-950/50 rounded">
+          </div>
+
+          {/* Breakdown */}
+          <div className="border border-neutral-800 bg-neutral-900 p-6 rounded-sm">
+            <h3 className="text-lg font-semibold mb-4 text-cyan-400">
+              IOC Breakdown
+            </h3>
+            <div className="space-y-2 text-sm">
+              <BreakdownRow label="IP" value={data.ioc_type_breakdown.ip} />
+              <BreakdownRow label="Domain" value={data.ioc_type_breakdown.domain} />
+              <BreakdownRow label="URL" value={data.ioc_type_breakdown.url} />
+              <BreakdownRow label="Hash" value={data.ioc_type_breakdown.hash} />
+            </div>
+          </div>
+
+          {/* Recent Lookups */}
+          <div className="col-span-1 lg:col-span-2 border border-neutral-800 bg-neutral-900 p-6 rounded-sm">
+            <h3 className="text-lg font-semibold mb-4 text-cyan-400">
+              Recent Lookups
+            </h3>
+
+            {data.recent_lookups.length === 0 ? (
               <p className="text-neutral-500 text-sm">
-                Analytics overview chart will appear here.
+                No recent lookups found.
               </p>
-            </div>
-          </div>
-
-          {/* Insights Placeholder */}
-          <div className="col-span-1 border border-neutral-800 bg-neutral-900 p-6 rounded-sm">
-            <h3 className="text-lg font-semibold mb-4 text-cyan-400">
-              Recent Insights
-            </h3>
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-20 animate-pulse bg-neutral-950/50 rounded border border-neutral-800/50"
-                ></div>
-              ))}
-            </div>
-            <p className="text-center text-neutral-500 text-xs mt-4">
-              Insights coming soon
-            </p>
-          </div>
-
-          {/* Activity Placeholder */}
-          <div className="col-span-1 border border-neutral-800 bg-neutral-900 p-6 rounded-sm">
-            <h3 className="text-lg font-semibold mb-4 text-cyan-400">
-              Global Activity
-            </h3>
-            <div className="h-64 flex flex-col justify-center items-center gap-3 border border-dashed border-neutral-800 bg-neutral-950/50 rounded text-center p-4">
-              <i className="fa-solid fa-globe text-neutral-700 text-3xl"></i>
-              <p className="text-neutral-500 text-sm">
-                Your analytics will appear here once available.
-              </p>
-            </div>
-          </div>
-
-          {/* System Health Placeholder */}
-          <div className="col-span-1 border border-neutral-800 bg-neutral-900 p-6 rounded-sm">
-            <h3 className="text-lg font-semibold mb-4 text-cyan-400">
-              System Health
-            </h3>
-            <div className="space-y-6">
-              <div>
-                <div className="flex justify-between text-sm mb-1 text-neutral-400">
-                  <span>API Latency</span>
-                  <span>-- ms</span>
-                </div>
-                <div className="h-1.5 w-full bg-neutral-950 rounded-full overflow-hidden">
-                  <div className="h-full bg-neutral-800 w-1/2"></div>
-                </div>
+            ) : (
+              <div className="space-y-3">
+                {data.recent_lookups.map((item, i) => (
+                  <div
+                    key={i}
+                    className="border border-neutral-800 bg-neutral-950 p-3 rounded text-sm"
+                  >
+                    <div className="font-mono break-all text-cyan-400">
+                      {item.ioc_value}
+                    </div>
+                    <div className="flex justify-between text-neutral-500 mt-1">
+                      <span className="capitalize">{item.ioc_type}</span>
+                      <span>
+                        {new Date(item.timestamp).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1 text-neutral-400">
-                  <span>Database Load</span>
-                  <span>-- %</span>
-                </div>
-                <div className="h-1.5 w-full bg-neutral-950 rounded-full overflow-hidden">
-                  <div className="h-full bg-neutral-800 w-1/3"></div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+function StatCard({ title, value }: { title: string; value: number }) {
+  return (
+    <div className="border border-neutral-800 bg-neutral-950 p-5 rounded-sm">
+      <p className="text-sm text-neutral-400">{title}</p>
+      <p className="text-3xl font-bold text-cyan-400 mt-1">{value}</p>
+    </div>
+  );
+}
+
+function BreakdownRow({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex justify-between border-b border-neutral-800 pb-1">
+      <span className="text-neutral-400">{label}</span>
+      <span className="text-cyan-400 font-semibold">{value}</span>
+    </div>
+  );
+}
 
 export default Analytics;
