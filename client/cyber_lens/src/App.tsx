@@ -6,14 +6,12 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import History from "./pages/History";
 import News from "./pages/News";
-import NewsDetail from "./pages/NewsDetail";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import VerifyEmail from "./pages/VerifyEmail";
 import Analytics from "./pages/Analytics";
+import NewsDetail from "./pages/NewsDetail";
 
-import Login from "../../../contributors/MK-codes365/pages/Login";
-import Signup from "../../../contributors/MK-codes365/pages/Signup";
-import VerifyEmail from "../../../contributors/MK-codes365/pages/VerifyEmail";
-
-/* ---------- Shared Layout (Navbar + Footer) ---------- */
 const Layout = () => {
   return (
     <div className="min-h-screen flex flex-col">
