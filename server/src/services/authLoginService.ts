@@ -41,11 +41,6 @@ export async function authLoginService(
       password_hash: string;
       email_verified: boolean;
     };
-
-    if (!user.email_verified) {
-      throw new Error("Invalid credentials");
-    }
-
     const isValid = await verifyPassword(password, user.password_hash);
 
     if (!isValid) {

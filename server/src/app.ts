@@ -5,6 +5,7 @@ import {
   authenticateUser,
   authenticateUserOptional,
 } from "./middleware/authenticateUser";
+import { requireVerifiedEmail } from "./middleware/requireVerifiedEmail";
 import resolveRuntimeOwner from "./middleware/resolveRuntimeOwner";
 import newsRouter from "./routes/news";
 import lookupRouter from "./routes/lookup";
@@ -59,7 +60,7 @@ app.use("/", router);
 app.use("/lookup", lookupRouter);
 app.use("/history", historyRouter);
 // Protected routes: require a valid JWT
-app.use("/analytics", authenticateUser, analyticsRouter);
+app.use("/analytics", authenticateUser, requireVerifiedEmail, analyticsRouter);
 app.use("/", router);
 app.use("/news", newsRouter);
 

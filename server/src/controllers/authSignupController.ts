@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { authSignupService } from "../services/authSignupService";
+import { generateEmailVerificationToken } from "../services/emailVerificationToken";
 
 /**
  * POST /auth/signup
@@ -20,7 +21,16 @@ export async function authSignupController(
   try {
     const { email, password } = req.body;
 
-    await authSignupService({ email, password });
+    const { userId } = await authSignupService({ email, password });
+
+    const token = generateEmailVerificationToken({ userId, email });
+    const baseUrl = process.env.APP_BASE_URL?.replace(/\/$/, "");
+    const path = `/auth/verify-email?token=${encodeURIComponent(token)}`;
+    const verificationLink = baseUrl ? `${baseUrl}${path}` : path;
+
+    console.info(
+      `[email-verification] Magic link for ${email}: ${verificationLink}`,
+    );
 
     res.status(201).json({ status: "ok" });
   } catch (error) {

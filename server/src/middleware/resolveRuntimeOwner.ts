@@ -23,6 +23,12 @@ export function resolveRuntimeOwner(
     return;
   }
 
+  // Allow public verification link without owner context
+  if (req.path.startsWith("/auth/verify-email")) {
+    next();
+    return;
+  }
+
   const userOwner = resolveFromUser(req);
 
   if (userOwner) {
