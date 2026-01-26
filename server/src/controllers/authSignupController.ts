@@ -24,9 +24,14 @@ export async function authSignupController(
     const { userId } = await authSignupService({ email, password });
 
     const token = generateEmailVerificationToken({ userId, email });
-    const baseUrl = process.env.APP_BASE_URL?.replace(/\/$/, "");
-    const path = `/auth/verify-email?token=${encodeURIComponent(token)}`;
-    const verificationLink = baseUrl ? `${baseUrl}${path}` : path;
+    const frontendUrl = process.env.FRONTEND_URL?.replace(/\/$/, "");
+    if (!frontendUrl) {
+      throw new Error("FRONTEND_URL must be set in environment");
+    }
+
+    const verificationLink =
+      `${frontendUrl}/verify-email?token=${encodeURIComponent(token)}`;
+
 
     console.info(
       `[email-verification] Magic link for ${email}: ${verificationLink}`,
