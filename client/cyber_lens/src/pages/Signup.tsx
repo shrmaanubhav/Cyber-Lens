@@ -55,7 +55,7 @@ const Signup: React.FC = () => {
       console.log("Signup attempt:", { email, password });
 
       // Redirect to verify email
-      window.location.href = `/verify-email?email=${encodeURIComponent(email)}`;
+      window.location.href = `/check-email?email=${encodeURIComponent(email)}`;
     }, 1000);
   };
 

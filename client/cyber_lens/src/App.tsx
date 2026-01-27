@@ -8,6 +8,7 @@ import History from "./pages/History";
 import News from "./pages/News";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import SentEmail from "./pages/SentEmailConfirmation";
 import VerifyEmail from "./pages/VerifyEmail";
 import Analytics from "./pages/Analytics";
 import NewsDetail from "./pages/NewsDetail";
@@ -40,7 +41,9 @@ function App() {
         {/* -------- Auth Pages (NO Navbar / Footer) -------- */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/check-email" element={<SentEmail />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
+
       </Routes>
     </Router>
   );
