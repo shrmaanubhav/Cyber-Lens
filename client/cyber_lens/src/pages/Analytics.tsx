@@ -62,7 +62,6 @@ const Analytics: React.FC = () => {
         ) {
           setErrorState("unauthorized");
           setErrorMessage("Your session expired. Please sign in again.");
-          logout();
         } else {
           setErrorState("error");
           setErrorMessage(message);
@@ -86,15 +85,15 @@ const Analytics: React.FC = () => {
           <div className="mb-6 inline-flex items-center justify-center w-16 h-16 rounded-full bg-neutral-900 border border-neutral-800 text-cyan-500">
             <i className="fa-solid fa-lock text-2xl" />
           </div>
-          <h1 className="text-3xl font-bold mb-3">Access Restricted</h1>
-          <p className="text-neutral-400 mb-6">
-            {errorMessage || "You need to log in to view analytics."}
+          <h1 className="text-3xl font-bold mb-3">Sign In Required</h1>
+          <p className="text-neutral-400 mb-8">
+            Sign in to look up for analysis and view detailed threat detection activity and system performance.
           </p>
           <Link
             to="/login"
             className="inline-block px-8 py-3 bg-cyan-500 text-neutral-950 font-semibold hover:bg-cyan-400 transition-colors rounded"
           >
-            Log In to Continue
+            Go to Sign In
           </Link>
         </div>
       </div>

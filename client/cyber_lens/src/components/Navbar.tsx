@@ -1,13 +1,33 @@
 import { NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import Avatar from "./Avatar";
+
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleLogout = () => {
+  if (isSigningOut) return;
+
+  setIsSigningOut(true);
+
+  setTimeout(() => {
+    logout();
+    setProfileDropdownOpen(false);
+    setOpen(false);
+    navigate("/");
+    setIsSigningOut(false);
+  }, 800);
+};
+
+
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -122,15 +142,19 @@ const Navbar = () => {
                     {/* Logout */}
                     <div className="border-t border-slate-800 py-2">
                       <button
-                        onClick={() => {
-                          logout();
-                          setProfileDropdownOpen(false);
-                        }}
-                        className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-3"
+                        onClick={handleLogout}
+                        disabled={isSigningOut}
+                        className={`w-full px-4 py-2 text-left text-sm flex items-center gap-3 transition-colors
+                          ${
+                            isSigningOut
+                              ? "text-slate-500 cursor-not-allowed"
+                              : "text-slate-300 hover:bg-slate-800"
+                          }`}
                       >
                         <i className="fa-solid fa-right-from-bracket text-orange-400" />
-                        <span>Logout</span>
+                        <span>{isSigningOut ? "Signing out…" : "Logout"}</span>
                       </button>
+
                     </div>
                   </div>
                 )}
@@ -199,16 +223,19 @@ const Navbar = () => {
                       </p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => {
-                      logout();
-                      setOpen(false);
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 rounded transition-colors flex items-center gap-3"
-                  >
-                    <i className="fa-solid fa-right-from-bracket text-orange-400" />
-                    <span>Logout</span>
-                  </button>
+                    <button
+                      onClick={handleLogout}
+                      disabled={isSigningOut}
+                      className={`w-full px-4 py-2 text-left text-sm rounded transition-colors flex items-center gap-3
+                        ${
+                          isSigningOut
+                            ? "text-slate-500 cursor-not-allowed"
+                            : "text-slate-300 hover:bg-slate-800"
+                        }`}
+                    >
+                      <i className="fa-solid fa-right-from-bracket text-orange-400" />
+                      <span>{isSigningOut ? "Signing out…" : "Logout"}</span>
+                    </button>
                 </div>
               </>
             ) : (
