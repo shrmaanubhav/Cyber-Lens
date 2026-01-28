@@ -1,5 +1,7 @@
 import pool from "../db";
 import { hashPassword } from "../utils/password";
+import { generateEmailVerificationToken } from "./emailVerificationToken";
+import { sendEmail } from "./emailService";
 
 interface SignupInput {
   email: string;
@@ -43,16 +45,29 @@ export async function authSignupService(
 
     const result = await client.query(
       `
-      INSERT INTO users (email, password_hash)
-      VALUES ($1, $2)
+      INSERT INTO users (email, password_hash, last_verification_sent_at)
+      VALUES ($1, $2, NOW())
       RETURNING id
       `,
       [email, passwordHash],
     );
 
-    return {
-      userId: result.rows[0].id,
-    };
+    const userId = result.rows[0].id;
+
+    const token = generateEmailVerificationToken({
+      userId,
+      email,
+    });
+
+    const verificationLink = `${process.env.FRONTEND_URL}/verify?token=${token}`;
+
+    await sendEmail({
+      to: email,
+      subject: "Verify your email — Cyber Lens",
+      verificationLink,
+    });
+
+    return { userId };
   } finally {
     client.release();
   }
