@@ -10,7 +10,7 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(true);
 
   const checkAuthState = useCallback(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken");
     const email = localStorage.getItem("userEmail");
 
     if (token && email) {
@@ -20,16 +20,16 @@ export function useAuth() {
     }
   }, []);
 
-  // Check auth state from localStorage on mount
+  // Check auth state on mount
   useEffect(() => {
     checkAuthState();
     setIsLoading(false);
   }, [checkAuthState]);
 
-  // Listen for storage changes (e.g., logout from another tab) and custom events (same tab)
+  // Listen for auth changes (multi-tab + same-tab)
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "token" || e.key === "userEmail") {
+      if (e.key === "accessToken" || e.key === "userEmail") {
         checkAuthState();
       }
     };
@@ -40,7 +40,7 @@ export function useAuth() {
 
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("auth-state-changed", handleAuthStateChange);
-    
+
     return () => {
       window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("auth-state-changed", handleAuthStateChange);
@@ -48,18 +48,16 @@ export function useAuth() {
   }, [checkAuthState]);
 
   const login = useCallback((email: string, token: string) => {
-    localStorage.setItem("token", token);
+    localStorage.setItem("accessToken", token);
     localStorage.setItem("userEmail", email);
     setUser({ email, token });
-    // Dispatch custom event for same-tab updates
     window.dispatchEvent(new Event("auth-state-changed"));
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
     localStorage.removeItem("userEmail");
     setUser(null);
-    // Dispatch custom event for same-tab updates
     window.dispatchEvent(new Event("auth-state-changed"));
   }, []);
 
