@@ -34,6 +34,7 @@ export async function requestPasswordResetController(
       to: email,
       subject: "Reset your Cyber Lens password",
       verificationLink: resetLink,
+      emailType: "passwordReset",
     });
   }
   return res.json({
