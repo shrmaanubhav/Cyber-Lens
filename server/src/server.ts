@@ -2,6 +2,8 @@ import "dotenv/config";
 import app from "./app";
 import { testConnection } from "./db";
 import { runMigrations } from "./db/migrate";
+import { startNewsCron } from "./cron/newsCron";
+import { runNewsScraper } from "./services/newsScraper";
 
 const PORT = process.env.PORT || 3000;
 
@@ -12,6 +14,11 @@ async function startServer() {
     
     // Run migrations automatically on startup
     await runMigrations();
+
+    startNewsCron();
+    console.log("News scraper cron started");
+    runNewsScraper().catch(console.error);
+
   } catch (error) {
     console.error("Database connection failed:", error);
     process.exit(1);

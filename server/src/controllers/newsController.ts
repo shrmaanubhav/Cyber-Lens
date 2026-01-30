@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { fetchNewsDetail, fetchNewsList } from "../services/newsService";
-import { runNewsScraper } from "../services/newsScraper";
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
@@ -42,9 +41,6 @@ export async function newsListController(
   res: Response,
 ): Promise<void> {
   try {
-    const stats = await runNewsScraper();
-    console.log("News scraper stats:", stats);
-
     const limit = parseLimit(req.query.limit);
     const offset = parseOffset(req.query.offset);
 
