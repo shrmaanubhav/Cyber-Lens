@@ -126,10 +126,14 @@ const Navbar = () => {
                         <i className="fa-solid fa-chart-bar text-cyan-400" />
                         <span>Analysis</span>
                       </button>
-                      <button className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-3">
+                      <NavLink
+                        to="/profile"
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-3"
+                      >
                         <i className="fa-solid fa-user text-slate-400" />
                         <span>Profile</span>
-                      </button>
+                      </NavLink>
                       <NavLink
                         to="/settings"
                         onClick={() => setProfileDropdownOpen(false)}
@@ -211,6 +215,13 @@ const Navbar = () => {
               className={linkClass}
             >
               Settings
+            </NavLink>
+            <NavLink
+              to="/profile"
+              onClick={() => setOpen(false)}
+              className={linkClass}
+            >
+              Profile
             </NavLink>
 
             {isAuthenticated && user ? (

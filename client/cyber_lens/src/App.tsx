@@ -1,3 +1,4 @@
+import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -22,6 +23,7 @@ import Analytics from "./pages/Analytics";
 import NewsDetail from "./pages/NewsDetail";
 import Settings from "./pages/Settings";
 import VerifyAction from "./pages/VerifyAction";
+import Profile from "./pages/Profile";
 
 const Layout = () => {
   return (
@@ -48,6 +50,7 @@ function App() {
           <Route path="/news/:id" element={<NewsDetail />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
 
         {/* -------- Auth Pages (NO Navbar / Footer) -------- */}
