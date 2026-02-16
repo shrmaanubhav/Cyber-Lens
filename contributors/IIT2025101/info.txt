@@ -1,5 +1,0 @@
-Name: Jatin
-Enrollment: IIT2025101
-GitHub: thenix09
-College: IIIT Allahabad
-Interest: Software Engineering, Open Source

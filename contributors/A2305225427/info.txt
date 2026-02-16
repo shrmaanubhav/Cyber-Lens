@@ -1,4 +1,0 @@
-Name: Ishan Raj Singh
-GitHub Username: ishanrajsingh
-Your hobbies: Tech, Football
-Write some thing that you expect from this event: Experience for GSOC

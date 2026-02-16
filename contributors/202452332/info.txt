@@ -1,4 +1,0 @@
-Name: Soham Agarwal
-GitHub Username: SohamSDA
-Your hobbies: Gymming,Badminton, building full-stack projects, learning system design
-Expectation from this event: To gain real open-source experience, improve collaboration skills, and build confidence contributing to real-world projects.
