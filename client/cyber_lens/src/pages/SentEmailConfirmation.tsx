@@ -7,7 +7,7 @@ const SentEmail: React.FC = () => {
   const [isResending, setIsResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [message, setMessage] = useState<string>("");
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const resendInFlightRef = useRef(false);
 
   // Read email from query params (Vite-safe)
