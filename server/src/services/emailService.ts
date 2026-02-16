@@ -1,123 +1,75 @@
-﻿import nodemailer from "nodemailer";
-import transporter from "../utils/emailTransport";
+﻿import { Resend } from "resend";
 
 interface SendEmailOptions {
   to: string;
   subject: string;
   verificationLink: string;
-  emailType?: 'registration' | 'passwordReset';
+  emailType?: "registration" | "passwordReset";
 }
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendEmail({
   to,
   subject,
   verificationLink,
-  emailType = 'registration',
+  emailType = "registration",
 }: SendEmailOptions): Promise<void> {
+  if (!process.env.RESEND_API_KEY) {
+    console.warn("[email] RESEND_API_KEY missing, skipping email send.");
+    return;
+  }
+
+  const isPasswordReset = emailType === "passwordReset";
+
+  const html = isPasswordReset
+    ? `
+      <div style="font-family: Arial, Helvetica, sans-serif; line-height: 1.6;">
+        <h2>Reset your Cyber Lens password</h2>
+
+        <p>You requested a password reset. Click below:</p>
+
+        <p>
+          <a href="${verificationLink}">
+            Reset Password
+          </a>
+        </p>
+
+        <p><strong>Note:</strong> This link expires in 1 hour.</p>
+
+        <p>If you did not request this, ignore this email.</p>
+
+        <p>- Cyber Lens Team</p>
+      </div>
+    `
+    : `
+      <div style="font-family: Arial, Helvetica, sans-serif; line-height: 1.6;">
+        <h2>Welcome to Cyber Lens</h2>
+
+        <p>Please verify your email address:</p>
+
+        <p>
+          <a href="${verificationLink}">
+            Verify Email
+          </a>
+        </p>
+
+        <p>If you did not sign up, ignore this email.</p>
+
+        <p>- Cyber Lens Team</p>
+      </div>
+    `;
+
   try {
-    const isPasswordReset = emailType === 'passwordReset';
-    
-    const emailContent = isPasswordReset ? {
-      text: `
-        Reset your Cyber Lens password
-
-        You requested to reset your password. Click the link below to set a new password:
-        ${verificationLink}
-
-        This link will expire in 1 hour. If you didn't request this password reset, you can safely ignore this email.
-        `,
-      html: `
-        <div style="font-family: Arial, Helvetica, sans-serif; line-height: 1.6; color: #111;">
-          <h2 style="margin-bottom: 12px;">Reset your Cyber Lens password</h2>
-
-          <p>
-            You requested to reset your password. Click the link below to set a new password:
-          </p>
-
-          <p>
-            <a
-              href="${verificationLink}"
-              style="
-                color: #2563eb;
-                text-decoration: none;
-                font-weight: 500;
-              "
-            >
-              Click here to reset your password
-            </a>
-          </p>
-
-          <p style="margin-top: 16px; color: #666;">
-            <strong>Note:</strong> This link will expire in 1 hour for security reasons.
-          </p>
-
-          <p style="margin-top: 16px;">
-            If you didn't request this password reset, you can safely ignore this email.
-          </p>
-
-          <p style="margin-top: 24px; color: #555;">
-            - Cyber Lens Team
-          </p>
-        </div>
-      `
-    } : {
-      text: `
-        Welcome to Cyber Lens!
-
-        Please verify your email address by visiting the link below:
-        ${verificationLink}
-
-        If you did not sign up, you can safely ignore this email.
-        `,
-
-      html: `
-        <div style="font-family: Arial, Helvetica, sans-serif; line-height: 1.6; color: #111;">
-          <h2 style="margin-bottom: 12px;">Welcome to Cyber Lens</h2>
-
-          <p>
-            Please verify your email address by clicking the link below:
-          </p>
-
-          <p>
-            <a
-              href="${verificationLink}"
-              style="
-                color: #2563eb;
-                text-decoration: none;
-                font-weight: 500;
-              "
-            >
-              Click here to verify your email
-            </a>
-          </p>
-
-          <p style="margin-top: 16px;">
-            If you did not sign up, you can safely ignore this email.
-          </p>
-
-          <p style="margin-top: 24px; color: #555;">
-            - Cyber Lens Team
-          </p>
-        </div>
-      `
-    };
-
-    const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM,
+    const result = await resend.emails.send({
+      from: process.env.EMAIL_FROM || "Cyber Lens <onboarding@resend.dev>",
       to,
       subject,
-      text: emailContent.text,
-      html: emailContent.html,
+      html,
     });
 
-    // Ethereal/stream preview URL (for testing)
-    const previewUrl = nodemailer.getTestMessageUrl(info);
-    if (previewUrl) {
-      console.info("[email] Preview URL:", previewUrl);
-    } else if ((info as any).message) {
-      console.info("[email] Message (stream):\n", (info as any).message.toString());
-    }
+    console.log("[email] Sent successfully:", result.id);
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error("[email] Resend send failed:", error);
   }
 }
