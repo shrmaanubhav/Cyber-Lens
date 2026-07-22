@@ -17,9 +17,9 @@ import { runNewsScraper } from "./services/newsScraper";
 
 const app = express();
 
-const corsOrigin = process.env.CORS_ORIGIN;
+const allowedOrigins = process.env.CORS_ORIGIN?.split(",").map(origin => origin.trim()) ?? [];
 
-if (!corsOrigin) {
+if (allowedOrigins.length === 0) {
   throw new Error("CORS_ORIGIN must be set in environment");
 }
 
@@ -27,7 +27,18 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: corsOrigin,
+    origin(origin, callback) {
+      // Allow requests without an Origin (Postman, curl, server-to-server)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked: ${origin}`));
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "X-Client-ID", "Authorization"],
@@ -44,10 +55,14 @@ app.get("/", (_req, res) => {
 
 // Protected routes: require a valid JWT
 app.use("/analytics", authenticateUser, requireVerifiedEmail, analyticsRouter);
+
 app.use("/", router);
 app.use("/news", newsRouter);
 app.use("/lookup", lookupRouter);
 app.use("/history", historyRouter);
 app.use("/auth", authRouter);
+
+// Start background jobs
+runNewsScraper();
 
 export default app;
